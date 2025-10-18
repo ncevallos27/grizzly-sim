@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Setup Python venv",
+      "type": "shell",
+
+      // Default for macOS/Linux
+      "command": "/bin/bash",
+      "args": [
+        "-lc",
+        "if [ ! -d .venv ]; then python3 -m venv .venv; fi; source .venv/bin/activate; if [ -f requirements.txt ]; then pip install -r requirements.txt; fi; echo 'venv ready'"
+      ],
+
+      // Override for Windows
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy", "Bypass",
+          "-Command",
+          "if (-not (Test-Path .venv)) { python -m venv .venv }; & .\\.venv\\Scripts\\Activate.ps1; if (Test-Path requirements.txt) { pip install -r requirements.txt }; Write-Output 'venv ready'"
+        ]
+      },
+
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}
