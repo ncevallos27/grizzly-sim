@@ -4,10 +4,11 @@ only 2 wheels allows for an understanding of the robot
 """
 
 from dataclasses import dataclass
-from constants import SIMPLE_ROVER_CONSTANTS
 from motor.simple import SimpleMotorState, SimpleMotor
+from motor.constants import SIMPLE_MOTOR_CONSTANTS
 from typing import List
 import math
+from .base import Rover, RoverState
 
 # """
 # A class to handle all the angles assoicated with the rover
@@ -23,11 +24,9 @@ import math
 A class to handle simple rover state to pass up through the layers
 """
 @dataclass(frozen=True)
-class SimpleRoverState():
+class SimpleRoverState(RoverState):
     motor1:SimpleMotorState
     motor2:SimpleMotorState
-    x:float
-    y:float
     v:float
     omega:float
     theta:float
@@ -35,17 +34,16 @@ class SimpleRoverState():
 """
 An implementation of the simple rover
 """
-class SimpleRover():
-    def __init__(self, radius:float, axelLength:float, startingX:float, startingY:float, startingTheta:float, startingV:float, startingW:float):
-        self.__radius:float = radius
-        self.__axel:float = axelLength
-        self.motor1:SimpleMotor = SimpleMotor(SIMPLE_ROVER_CONSTANTS.RADIUS)
-        self.motor2:SimpleMotor = SimpleMotor(SIMPLE_ROVER_CONSTANTS.RADIUS)
-        self.__currentState:SimpleRoverState = SimpleRoverState(self.motor1.getCurrentState(), self.motor2.getCurrentState(), startingX, startingY, startingV, startingW, startingTheta)
+class SimpleRover(Rover):
+    def __init__(self, radius:float, axelLength:float, startState:SimpleRoverState):
+        self.__radius = radius
+        self.__axel = axelLength
+        self.motor1 = SimpleMotor(SIMPLE_MOTOR_CONSTANTS.MAX_RPM, SIMPLE_MOTOR_CONSTANTS.MAX_VOLTAGE, startState.motor1)
+        self.motor2 = SimpleMotor(SIMPLE_MOTOR_CONSTANTS.MAX_RPM, SIMPLE_MOTOR_CONSTANTS.MAX_VOLTAGE, startState.motor2)
+        self.cs = startState
     
-    @property
-    def getCurrentState(self):
-        return self.__currentState
+    def getCurrentState(self) -> SimpleRoverState:
+        return self.cs
 
     """
     converts to RPM to velocity
@@ -68,16 +66,18 @@ class SimpleRover():
         w = (vl - vr)/self.__axel
 
         if abs(w) > 1e-6:
-            x_new = self.__currentState.x + (v/w)*(math.sin(self.__currentState.theta + w*tickLength) - math.sin(self.__currentState.theta))
-            y_new = self.__currentState.y - (v/w)*(math.cos(self.__currentState.theta + w*tickLength) - math.cos(self.__currentState.theta))
-            theta_new = self.__currentState.theta + w*tickLength
+            x_new = self.cs.x + (v/w)*(math.sin(self.cs.theta + w*tickLength) - math.sin(self.cs.theta))
+            y_new = self.cs.y - (v/w)*(math.cos(self.cs.theta + w*tickLength) - math.cos(self.cs.theta))
+            theta_new = self.cs.theta + w*tickLength
         else:
-            x_new = self.__currentState.x + v*tickLength*math.cos(self.__currentState.theta)
-            y_new = self.__currentState.y + v*tickLength*math.sin(self.__currentState.theta)
-            theta_new = self.__currentState.theta
+            x_new = self.cs.x + v*tickLength*math.cos(self.cs.theta)
+            y_new = self.cs.y + v*tickLength*math.sin(self.cs.theta)
+            theta_new = self.cs.theta
 
         # finally construct a new state to pull from
-        self.__currentState = SimpleRoverState(motor1State, motor2State, x_new, y_new, v, w, theta_new)
-
-        return
+        self.cs = SimpleRoverState( x_new, y_new, motor1State, motor2State, v, w, theta_new)
     
+    def reset(self) -> None:
+        self.motor1.reset()
+        self.motor2.reset()
+        self.cs = SimpleRoverState(0, 0, self.motor1.getCurrentState(), self.motor2.getCurrentState(), 0, 0, 0)
