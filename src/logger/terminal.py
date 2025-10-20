@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Mapping, Any
-from .base import Logger
+from src.logger.base import Logger
 
 class TerminalLogger(Logger):
     """

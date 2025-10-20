@@ -4,11 +4,11 @@ only 2 wheels allows for an understanding of the robot
 """
 
 from dataclasses import dataclass
-from motor.simple import SimpleMotorState, SimpleMotor
-from motor.constants import SIMPLE_MOTOR_CONSTANTS
+from src.motor.simple import SimpleMotorState, SimpleMotor
+from src.motor.constants import SIMPLE_MOTOR_CONSTANTS
 from typing import List
 import math
-from .base import Rover, RoverState
+from src.rover.base import Rover, RoverState
 
 # """
 # A class to handle all the angles assoicated with the rover
