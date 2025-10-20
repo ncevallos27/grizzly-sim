@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Any, Mapping
 
 @dataclass(frozen=True)
 class RoverState(ABC):
     x:float
     y:float
+
+    @abstractmethod
+    def ready(self) -> Mapping[str, Any]:
+        pass
 
 
 class Rover(ABC):
@@ -17,7 +21,7 @@ class Rover(ABC):
     def getCurrentState(self) -> RoverState: ...
 
     @abstractmethod
-    def runTick(self, command: List[float], tickLength:int) -> None: ...
+    def runTick(self, command: List[float], tickLength:float) -> None: ...
 
     @abstractmethod
     def reset(self) -> None: ...

@@ -6,7 +6,7 @@ only 2 wheels allows for an understanding of the robot
 from dataclasses import dataclass
 from src.motor.simple import SimpleMotorState, SimpleMotor
 from src.motor.constants import SIMPLE_MOTOR_CONSTANTS
-from typing import List
+from typing import List, Mapping, Any
 import math
 from src.rover.base import Rover, RoverState
 
@@ -30,6 +30,15 @@ class SimpleRoverState(RoverState):
     v:float
     omega:float
     theta:float
+
+    def ready(self) -> Mapping[str, Any]:
+        return {
+            'x' : self.x,
+            'y' : self.y,
+            'v' : self.v,
+            'omega' : self.omega,
+            'theta' : self.theta
+        }
 
 """
 An implementation of the simple rover
@@ -55,7 +64,7 @@ class SimpleRover(Rover):
     takes a command and runs the tick
     command: list of voltages
     """
-    def runTick(self, command: List[float], tickLength:int) -> None:
+    def runTick(self, command: List[float], tickLength:float) -> None:
         motor1State = self.motor1.getNewState(command[0])
         motor2State = self.motor2.getNewState(command[1])
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Mapping, Any
 from src.logger.base import Logger
+import math
 
 class TerminalLogger(Logger):
     """
@@ -26,7 +27,7 @@ class TerminalLogger(Logger):
         t = row.get("t", 0.0)
         x = row.get("x", 0.0)
         y = row.get("y", 0.0)
-        th = row.get("th", 0.0)
+        th = row.get("theta", 0.0) % math.pi
         v = row.get("v", 0.0)
         omega = row.get("omega", 0.0)
 
